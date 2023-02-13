@@ -6,7 +6,7 @@ const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", "false");
-const md5 = require("md5");
+const sha256 = require("sha256");
 const app = express();
 
 
@@ -47,7 +47,7 @@ app.route("/register")
     .post((req, res) => {
         const newUser = new User({
             email: req.body.username,
-            password: md5(req.body.password)
+            password: sha256(req.body.password)
         });
         newUser.save((err)=>{
             if(err){
@@ -72,7 +72,7 @@ app.route("/login")
                     console.log(err);
                     res.redirect("/");
                 } else {
-                    if( foundUser && md5(foundUser.password) === req.body.password) {
+                    if( foundUser && sha512(foundUser.password) === req.body.password) {
                         res.render("secrets");
                     } else {
                         console.log("Error Authenticating");
