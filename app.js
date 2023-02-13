@@ -7,6 +7,8 @@ const _ = require("lodash");
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", "false");
 const sha256 = require("sha256");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 const app = express();
 
 
@@ -45,17 +47,20 @@ app.route("/register")
         res.render("register");
     })
     .post((req, res) => {
-        const newUser = new User({
-            email: req.body.username,
-            password: sha256(req.body.password)
+        bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+            const newUser = new User({
+                email: req.body.username,
+                password: hash
+            });
+            newUser.save((err) => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    res.render("secrets");
+                }
+            });
         });
-        newUser.save((err)=>{
-            if(err){
-                console.log(err);
-            } else {
-                res.render("secrets");
-            }
-        });
+
     })
 
 app.route("/login")
@@ -72,12 +77,14 @@ app.route("/login")
                     console.log(err);
                     res.redirect("/");
                 } else {
-                    if( foundUser && sha512(foundUser.password) === req.body.password) {
-                        res.render("secrets");
-                    } else {
-                        console.log("Error Authenticating");
-                        res.redirect("/");
-                    }
+                    bcrypt.hash(req.body.password, saltRounds, (err, hash)=>{
+                        if (foundUser && foundUser.password === hash) {
+                            res.render("secrets");
+                        } else {
+                            console.log("Error Authenticating");
+                            res.redirect("/");
+                        }
+                    });
                 }
             });
     });
