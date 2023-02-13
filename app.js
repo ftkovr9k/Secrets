@@ -59,7 +59,6 @@ app.route("/register")
                 }
             });
         });
-
     })
 
 app.route("/login")
@@ -67,25 +66,26 @@ app.route("/login")
         res.render("login");
     })
     .post((req, res) => {
-        User.findOne(
-            {
-                email: req.body.username
-            },
-            (err, foundUser) => {
-                if (err) {
-                    console.log(err);
-                    res.redirect("/");
-                } else {
-                    bcrypt.hash(req.body.password, saltRounds, (err, hash)=>{
-                        if (foundUser && foundUser.password === hash) {
+        const username = req.body.username;
+        const password = req.body.password;
+
+        User.findOne({ email: username }, (err, foundUser) => {
+            if (err) {
+                console.log(err);
+            } else {
+                if (foundUser) {
+                    bcrypt.compare(password, foundUser.password, (err, result) => {
+                        if (result) {
                             res.render("secrets");
                         } else {
-                            console.log("Error Authenticating");
                             res.redirect("/");
                         }
                     });
+                } else {
+                    res.redirect("/");
                 }
-            });
+            }
+        });
     });
 
 app.route("/logout")
