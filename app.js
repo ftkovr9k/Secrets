@@ -6,7 +6,6 @@ const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", "false");
-const sha256 = require("sha256");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const app = express();
